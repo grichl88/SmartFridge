@@ -67,5 +67,16 @@ public class SmartFridgeManagerImplTest {
         fillFactorItemType = testFridge.getFillFactor(110);
         System.out.println("how much milk is there? Should be .625: " + fillFactorItemType);
         assertEquals( .625,fillFactorItemType, .01);
+
+        testFridge.handleItemRemoved("99");
+        fillFactorItemType = testFridge.getFillFactor(110);
+        System.out.println("remove a milk, how much is left? Should be .5 instead of .625: " + fillFactorItemType);
+        assertEquals( .5,fillFactorItemType, .01);
+
+        testFridge.forgetItem(110);
+        fillFactorItemType = testFridge.getFillFactor(110);
+        System.out.println("remove all the milk, how much is left? Should be 0.0: " + fillFactorItemType);
+        assertEquals( 0.0,fillFactorItemType, .001);
+
     }
 }

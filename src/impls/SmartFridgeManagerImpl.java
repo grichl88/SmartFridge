@@ -36,22 +36,16 @@ public class SmartFridgeManagerImpl implements SmartFridgeManagerInt {
             long itemType = 0;
             double newFillFactor = 0.0;
             double itemFillFactor = 0.0;
-            for(Iterator<Map.Entry<Item, Double>> it = inventory.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry<Item, Double> entry = it.next();
-                if(entry.getKey().equals(item)) {
-                    itemType = item.getItemType();
-                    itemFillFactor = entry.getValue();
-                    it.remove();
-                    itemIdMap.remove(itemUUID);
-                }
+            if(inventory.containsKey(item)){
+                itemType = item.getItemType();
+                itemFillFactor = inventory.get(item);
+                inventory.remove(item);
+                itemIdMap.remove(itemUUID);
             }
+
             newFillFactor += itemFillFactorMap.get(itemType).getFillFactor() - itemFillFactor;
-            for(Iterator<Map.Entry<Long, ItemFillFactor>> fillFactorIterator = itemFillFactorMap.entrySet().iterator(); fillFactorIterator.hasNext(); ) {
-                Map.Entry<Long, ItemFillFactor> entry = fillFactorIterator.next();
-                if(entry.getKey().equals(itemType)){
-                    entry.getValue().setFillFactor(newFillFactor);
-                    itemFillFactorMap.put(itemType, entry.getValue());
-                }
+            if(itemFillFactorMap.containsKey(itemType)){
+                itemFillFactorMap.get(itemType).setFillFactor(newFillFactor);
             }
         }
     }
@@ -104,8 +98,6 @@ public class SmartFridgeManagerImpl implements SmartFridgeManagerInt {
             Map.Entry<Long, ItemFillFactor> entry = inventoryIterator.next();
             if(entry.getValue().getFillFactor() <= fillFactor) {
                 map.put(entry.getKey(), getFillFactor(entry.getKey()));
-                String keyString = String.valueOf(entry.getKey());
-                String fillFactorString = String.valueOf(entry.getValue().getFillFactor());
                 Object[] obj = new Object[] {entry.getValue()};
                 itemTypeArray.add(obj);
             }
@@ -156,13 +148,25 @@ public class SmartFridgeManagerImpl implements SmartFridgeManagerInt {
      * @param itemType type of Item
      */
     public void forgetItem( long itemType ){
+        ArrayList<String> itemIdArray = new ArrayList<>();
+        ArrayList<Object> itemArray = new ArrayList<>();
         for(Iterator<Map.Entry<String, Item>> it = itemIdMap.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<String, Item> entry = it.next();
             Item item = entry.getValue();
             if(item.getItemType().equals(itemType)) {
-                itemIdMap.remove(item.getItemUUID());
-                inventory.remove(item);
+                if(itemIdMap.containsKey(item.getItemUUID())){
+                    itemIdArray.add(item.getItemUUID());
+                }
+                if(inventory.containsKey(item)){
+                    itemArray.add(item);
+                }
             }
+        }
+        for (String itemId : itemIdArray) {
+            itemIdMap.remove(itemId);
+        }
+        for (Object item : itemArray) {
+            inventory.remove(item);
         }
         itemFillFactorMap.remove(itemType);
     }
